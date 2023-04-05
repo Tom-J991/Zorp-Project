@@ -1,0 +1,16 @@
+3
+2,-1,-1,potion of invocation,1.1,1,1
+2,5,4,sword of invocation,1,1.1,1
+2,-1,-1,shield of improbability,1,1,1.1
+4
+1,5,3,20,10,5,0
+1,8,4,20,10,5,0
+1,7,4,20,10,5,0
+1,7,2,20,10,5,0
+3
+3,3,1,10
+3,3,4,10
+3,4,4,10
+0,6,1,100,20,20,2
+potion of invocation
+shield of improbability

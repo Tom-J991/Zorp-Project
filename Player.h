@@ -1,11 +1,14 @@
 #pragma once
 
-#include "Point2D.h"
-#include "Powerup.h"
+#include "Character.h"
 
 #include <vector>
 
-class Player
+class Powerup;
+class Room;
+class Enemy;
+
+class Player : public Character
 {
 public:
 	Player();
@@ -13,23 +16,14 @@ public:
 	Player(Point2D position);
 	~Player();
 
-	void setPosition(Point2D position);
-	Point2D getPosition();
-
 	void draw();
+	void drawDescription();
+	void lookAt();
 
-	bool executeCommand(int command, int roomType);
+	void executeCommand(int command, Room* pRoom);
 
 private:
-	bool pickup(int roomType);
-
-private:
-	Point2D m_mapPosition;
-
-	std::vector<Powerup> m_powerups;
-
-	int m_healthPoints;
-	int m_attackPoints;
-	int m_defensePoints;
+	void pickup(Room *pRoom);
+	void attack(Enemy *pEnemy);
 
 };

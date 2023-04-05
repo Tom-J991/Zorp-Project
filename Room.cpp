@@ -1,8 +1,13 @@
 #include "Room.h"
 
 #include "GameDefines.h"
+#include "GameObject.h"
+#include "Enemy.h"
+#include "Powerup.h"
+#include "Food.h"
 
 #include <iostream>
+#include <algorithm>
 
 Room::Room()
 	: m_type{ EMPTY }
@@ -20,9 +25,62 @@ void Room::setType(int type)
 	m_type = type;
 }
 
+void Room::addGameObject(GameObject *object)
+{
+    m_objects.push_back(object);
+    std::sort(m_objects.begin(), m_objects.end(), GameObject::compare);
+}
+void Room::removeGameObject(GameObject *object)
+{
+    for (auto it = m_objects.begin(); it != m_objects.end(); it++)
+    {
+        if (*it == object)
+        {
+            (*it)->setPosition(Point2D{ -1, -1 });
+            m_objects.erase(it);
+            return;
+        }
+    }
+}
+void Room::clearGameObjects()
+{
+    m_objects.clear();
+}
+
 int Room::getType()
 {
 	return m_type;
+}
+
+Enemy *Room::getEnemy()
+{
+    for (GameObject *pObj : m_objects)
+    {
+        Enemy *enemy = dynamic_cast<Enemy *>(pObj);
+        if (enemy != nullptr)
+            return enemy;
+    }
+    return nullptr;
+}
+Powerup *Room::getPowerup()
+{
+    for (GameObject *pObj : m_objects)
+    {
+        Powerup *powerup = dynamic_cast<Powerup *>(pObj);
+        if (powerup != nullptr)
+            return powerup;
+    }
+    return nullptr;
+}
+Food *Room::getFood()
+{
+    for (GameObject *pObj : m_objects)
+    {
+        Food *food = dynamic_cast<Food *>(pObj);
+        if (food != nullptr)
+            return food;
+    }
+    return nullptr;
 }
 
 void Room::draw()
@@ -34,18 +92,10 @@ void Room::draw()
     switch (m_type)
     {
     case EMPTY:
-        std::cout << "[ " << GREEN << "\xb0" << RESET_COLOR << " ] ";
-        break;
-    case ENEMY:
-        std::cout << "[ " << RED << "\x94" << RESET_COLOR << " ] ";
-        break;
-    case TREASURE_HP:
-    case TREASURE_AT:
-    case TREASURE_DF:
-        std::cout << "[ " << YELLOW << "$" << RESET_COLOR << " ] ";
-        break;
-    case FOOD:
-        std::cout << "[ " << WHITE << "\xcf" << RESET_COLOR << " ] ";
+        if (m_objects.size() > 0)
+            m_objects[0]->draw();
+        else
+            std::cout << "[ " << GREEN << "\xb0" << RESET_COLOR << " ] ";
         break;
     case ENTRANCE:
         std::cout << "[ " << WHITE << "\x9d" << RESET_COLOR << " ] ";
@@ -64,18 +114,10 @@ void Room::drawDescription()
     switch (m_type)
     {
     case EMPTY:
-        std::cout << INDENT << "You are in an empty meadow, There is nothing of note here." << std::endl;
-        break;
-    case ENEMY:
-        std::cout << INDENT << "BEWARE. An enemy is approaching." << std::endl;
-        break;
-    case TREASURE_HP:
-    case TREASURE_AT:
-    case TREASURE_DF:
-        std::cout << INDENT << "There appears to be some treasure here. Perhaps you should investigate further." << std::endl;
-        break;
-    case FOOD:
-        std::cout << INDENT << "At last! You collect some food to sustain you on your journey." << std::endl;
+        if (m_objects.size() > 0)
+            m_objects[0]->drawDescription();
+        else
+            std::cout << INDENT << "You are in an empty meadow, There is nothing of note here." << std::endl;
         break;
     case ENTRANCE:
         std::cout << INDENT << "The entrance you used to enter this maze is blocked. There is no going back." << std::endl;
@@ -85,38 +127,10 @@ void Room::drawDescription()
         break;
     }
 }
-
-bool Room::executeCommand(int command)
+void Room::lookAt()
 {
-    std::cout << EXTRA_OUTPUT_POS;
-    switch (command)
-    {
-    case LOOK:
-        if (m_type == TREASURE_HP || m_type == TREASURE_AT || m_type == TREASURE_DF)
-            std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "There is some treasure here. It looks small enough to pick up." << std::endl;
-        else
-            std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You look around, but see nothing worth mentioning." << std::endl;
-
-        std::cout << INDENT << "Press 'Enter' to continue.";
-        std::cin.clear();
-        std::cin.ignore(std::cin.rdbuf()->in_avail());
-        std::cin.get();
-        return true;
-    case FIGHT:
-        std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You could try to fight, but you don't have a weapon." << std::endl;
-        std::cout << INDENT << "Press 'Enter' to continue.";
-        std::cin.clear();
-        std::cin.ignore(std::cin.rdbuf()->in_avail());
-        std::cin.get();
-        return true;
-    default:
-        std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You try, but you just can't do it." << std::endl;
-        std::cout << INDENT << "Press 'Enter' to continue.";
-        std::cin.clear();
-        std::cin.ignore(std::cin.rdbuf()->in_avail());
-        std::cin.get();
-        break;
-    }
-
-	return false;
+    if (m_objects.size() > 0)
+        m_objects[0]->lookAt();
+    else
+        std::cout << EXTRA_OUTPUT_POS << RESET_COLOR << "You look around, but see nothing worth mentioning." << std::endl;
 }
